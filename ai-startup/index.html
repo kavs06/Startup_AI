@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Copilot - AI Operating Plan Dashboard</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- CSS Link -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Embedded Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3-1.912 5.886a1 1 0 0 1-.95.686H2.929l4.907 3.566a1 1 0 0 1 .364 1.118L6.288 20.14l4.9-3.564a1 1 0 0 1 1.164 0l4.9 3.564-1.912-5.884a1 1 0 0 1 .364-1.118l4.907-3.566h-6.209a1 1 0 0 1-.95-.686z'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- ================= AUTH GATE ================= -->
+  <div id="auth-gate" class="auth-container">
+    <div class="auth-card">
+      <div class="auth-visual">
+        <div class="auth-glow"></div>
+        <div class="auth-illustration">
+          <img src="startup_3d_illustration.png" alt="Startup 3D Illustration" class="auth-3d-img">
+        </div>
+        <div class="auth-welcome-text">
+          <h2>Launch Your Vision.</h2>
+          <p>Get a complete AI-driven operating plan, roadmap, unit economics, pitch deck outline, and coaching in minutes.</p>
+        </div>
+      </div>
+      <div class="auth-form-side">
+        <!-- Tab Headers -->
+        <div class="auth-tabs">
+          <button id="tab-login-btn" class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+          <button id="tab-register-btn" class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" required placeholder="name@company.com">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign In to Dashboard</button>
+          <div class="auth-demo-tip">
+            <p>💡 Tip: Use any details to register or login. It runs entirely client-side!</p>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" required placeholder="Jane Doe">
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" required placeholder="jane@startup.io">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Create Free Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP WORKSPACE ================= -->
+  <div id="main-app" class="app-layout hidden">
+    
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i data-lucide="zap"></i>
+        </div>
+        <span class="brand-name">Startup Copilot</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="onboarding" onclick="switchTab('onboarding')">
+          <i data-lucide="sparkles"></i>
+          <span>New Plan</span>
+        </button>
+        <button class="nav-item" data-tab="market" id="nav-market" onclick="switchTab('market')">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Market Analysis</span>
+        </button>
+        <button class="nav-item" data-tab="competitors" id="nav-competitors" onclick="switchTab('competitors')">
+          <i data-lucide="shield-alert"></i>
+          <span>Competitors</span>
+        </button>
+        <button class="nav-item" data-tab="roadmap" id="nav-roadmap" onclick="switchTab('roadmap')">
+          <i data-lucide="milestone"></i>
+          <span>MVP Roadmap</span>
+        </button>
+        <button class="nav-item" data-tab="funding" id="nav-funding" onclick="switchTab('funding')">
+          <i data-lucide="coins"></i>
+          <span>Funding &amp; Pitch</span>
+        </button>
+        <button class="nav-item" data-tab="coach" onclick="switchTab('coach')">
+          <i data-lucide="message-square"></i>
+          <span>AI Chat Coach</span>
+        </button>
+        <button class="nav-item" data-tab="resources" onclick="switchTab('resources')">
+          <i data-lucide="library"></i>
+          <span>Resource Hub</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-badge">
+          <div class="avatar" id="user-avatar">JD</div>
+          <div class="user-info">
+            <span class="user-name" id="user-display-name">Jane Doe</span>
+            <span class="user-role">Founder</span>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" title="Logout">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="header-title" id="project-title-header">Create A New Operating Plan</h1>
+          <span class="header-subtitle" id="project-industry-header">No startup loaded</span>
+        </div>
+        <div class="header-actions">
+          <button id="theme-toggle" class="header-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+            <i data-lucide="moon" id="theme-icon"></i>
+          </button>
+          <button id="btn-pdf-export" class="btn btn-secondary disabled" onclick="exportPlanPDF()" disabled>
+            <i data-lucide="download"></i>
+            <span>Export Plan PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views (Tabs) -->
+      <div class="content-body">
+        
+        <!-- TAB 1: ONBOARDING & STATEMENT INPUT -->
+        <section id="tab-onboarding" class="tab-panel active">
+          <div class="onboarding-grid">
+            <div class="welcome-card card">
+              <h2>Let's build your operating plan</h2>
+              <p>Enter your startup idea or problem statement. Our intelligence engine will analyze the problem, suggest validation checkpoints, model market sizes, create your roadmap, list matching resources, structure a pitch deck, and set up an AI coach.</p>
+              
+              <form id="problem-form" class="problem-entry-form" onsubmit="generateOperatingPlan(event)">
+                <div class="form-group">
+                  <label for="startup-name">Startup Name</label>
+                  <input type="text" id="startup-name" required placeholder="e.g., SwiftHire AI, GreenScale, MedSync">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="startup-industry">Industry Sector</label>
+                    <select id="startup-industry" required>
+                      <option value="SaaS">SaaS &amp; B2B Software</option>
+                      <option value="FinTech">Fintech</option>
+                      <option value="HealthTech">Digital Health / Medtech</option>
+                      <option value="Artificial Intelligence">AI &amp; Machine Learning</option>
+                      <option value="ClimateTech">Climate &amp; CleanTech</option>
+                      <option value="Consumer Web">Consumer Apps / Marketplace</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="startup-stage">Target Audience</label>
+                    <select id="startup-stage" required>
+                      <option value="B2B Enterprises">B2B Enterprises</option>
+                      <option value="SMBs">Small / Medium Businesses (SMBs)</option>
+                      <option value="Consumers">Direct Consumers (B2C)</option>
+                      <option value="Developers">Developers &amp; Technical Teams</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="problem-statement">Problem Statement &amp; Solution Draft</label>
+                  <textarea id="problem-statement" rows="5" required placeholder="What problem are you solving? Who is it for? And how will your product fix it? For example: 'Freelancers struggle to calculate and file quarterly tax payments accurately, leading to late penalties. Our tool integrates directly with invoices and bank feeds to auto-save and file quarterly taxes.'" oninput="checkProblemLength()"></textarea>
+                  <div class="textarea-helper">
+                    <span id="char-counter">0 / 120 minimum characters</span>
+                    <span class="suggest-badge" onclick="loadSampleIdea()">✨ Insert Sample Idea</span>
+                  </div>
+                </div>
+
+                <button type="submit" id="generate-btn" class="btn btn-primary btn-block">
+                  <i data-lucide="sparkles"></i>
+                  <span>Generate Operating Plan</span>
+                </button>
+              </form>
+            </div>
+
+            <div class="sidebar-tips-card card">
+              <h3>What makes a strong problem statement?</h3>
+              <div class="tip-item">
+                <div class="tip-number">1</div>
+                <div>
+                  <h4>Quantify the Pain</h4>
+                  <p>Mention exactly who suffers and what it costs them in terms of time, money, or efficiency.</p>
+                </div>
+              </div>
+              <div class="tip-item">
+                <div class="tip-number">2</div>
+                <div>
+                  <h4>Focus on your core differentiation</h4>
+                  <p>How does your solution stand out from spreadsheets, manual workarounds, or legacy giants?</p>
+                </div>
+              </div>
+              <div class="tip-item">
+                <div class="tip-number">3</div>
+                <div>
+                  <h4>Keep it simple</h4>
+                  <p>Avoid buzzword stuffing. Clear, actionable descriptions allow the generator to construct precise plans.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: AI STARTUP ANALYSIS -->
+        <section id="tab-market" class="tab-panel">
+          <div class="analysis-grid">
+            
+            <!-- Pre-existing Problem Warning (hidden by default) -->
+            <div id="known-problem-alert" class="card card-span-3 warning-card hidden">
+              <div class="card-header alert-header">
+                <i data-lucide="alert-triangle" class="icon-warning" style="stroke: #f59e0b; width: 24px; height: 24px;"></i>
+                <div class="alert-title-wrapper" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                  <h3 style="margin: 0; font-size: 1.1rem; color: #f59e0b;">Common / Pre-Existing Problem Space</h3>
+                  <span class="badge badge-warning" id="detected-space-badge" style="width: fit-content; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">Freelancer Tax</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <p class="alert-desc" style="font-size: 0.85rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 1rem;">We detected that your startup problem statement matches an existing, highly competitive business sector. To succeed, you must differentiate. Below are tactical suggestions and pivot vectors to sharpen your product focus:</p>
+                <ul class="suggestions-list" id="improved-suggestions-list" style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                  <!-- Suggestions loaded dynamically -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Value Prop & Persona -->
+            <div class="card card-span-2">
+              <div class="card-header">
+                <i data-lucide="compass" class="icon-accent"></i>
+                <h3>Core Strategic Foundation</h3>
+              </div>
+              <div class="card-body">
+                <div class="strategic-blocks">
+                  <div class="strat-block">
+                    <h4>Value Proposition</h4>
+                    <p id="analysis-valprop" class="placeholder-text">Waiting for statement plan generation...</p>
+                  </div>
+                  <div class="strat-block">
+                    <h4>Ideal Customer Persona (ICP)</h4>
+                    <p id="analysis-icp" class="placeholder-text">Waiting for statement plan generation...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validation Checkpoints -->
+            <div class="card">
+              <div class="card-header">
+                <i data-lucide="check-circle" class="icon-accent"></i>
+                <h3>Validation Milestones</h3>
+              </div>
+              <div class="card-body">
+                <ul class="validation-list" id="analysis-validation">
+                  <li class="placeholder-text">Enter startup idea to populate...</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- SWOT Analysis -->
+            <div class="card card-span-2">
+              <div class="card-header">
+                <i data-lucide="layout-grid" class="icon-accent"></i>
+                <h3>SWOT Analysis</h3>
+              </div>
+              <div class="card-body">
+                <div class="swot-grid">
+                  <div class="swot-box swot-s">
+                    <h4>S - Strengths</h4>
+                    <ul id="swot-strengths"><li>Generate plan to view.</li></ul>
+                  </div>
+                  <div class="swot-box swot-w">
+                    <h4>W - Weaknesses</h4>
+                    <ul id="swot-weaknesses"><li>Generate plan to view.</li></ul>
+                  </div>
+                  <div class="swot-box swot-o">
+                    <h4>O - Opportunities</h4>
+                    <ul id="swot-opportunities"><li>Generate plan to view.</li></ul>
+                  </div>
+                  <div class="swot-box swot-t">
+                    <h4>T - Threats</h4>
+                    <ul id="swot-threats"><li>Generate plan to view.</li></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Market Sizing (TAM/SAM/SOM) -->
+            <div class="card">
+              <div class="card-header">
+                <i data-lucide="pie-chart" class="icon-accent"></i>
+                <h3>Market Size Estimates</h3>
+              </div>
+              <div class="card-body">
+                <div class="market-sizes">
+                  <div class="market-size-item">
+                    <div class="ms-header">
+                      <span>Total Addressable Market (TAM)</span>
+                      <strong id="market-tam">$0M</strong>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="tam-bar" style="width: 100%"></div></div>
+                    <p class="ms-desc">Global market size if 100% penetration is achieved.</p>
+                  </div>
+                  <div class="market-size-item">
+                    <div class="ms-header">
+                      <span>Serviceable Addressable Market (SAM)</span>
+                      <strong id="market-sam">$0M</strong>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="sam-bar" style="width: 40%"></div></div>
+                    <p class="ms-desc">Your target geographical/operational chunk of the TAM.</p>
+                  </div>
+                  <div class="market-size-item">
+                    <div class="ms-header">
+                      <span>Serviceable Obtainable Market (SOM)</span>
+                      <strong id="market-som">$0M</strong>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="som-bar" style="width: 10%"></div></div>
+                    <p class="ms-desc">What you realistically plan to capture in the next 2-3 years.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unit Economics Calculator -->
+            <div class="card card-span-3">
+              <div class="card-header">
+                <i data-lucide="calculator" class="icon-accent"></i>
+                <h3>Interactive Unit Economics Simulator</h3>
+              </div>
+              <div class="card-body">
+                <div class="calculator-layout">
+                  <div class="calc-sliders">
+                    <div class="slider-group">
+                      <label for="slider-price">
+                        <span>Average Annual Price per Customer (ACV)</span>
+                        <strong id="label-price">$1,200</strong>
+                      </label>
+                      <input type="range" id="slider-price" min="50" max="20000" step="50" value="1200" oninput="updateCalculator()">
+                    </div>
+                    <div class="slider-group">
+                      <label for="slider-cac">
+                        <span>Customer Acquisition Cost (CAC)</span>
+                        <strong id="label-cac">$250</strong>
+                      </label>
+                      <input type="range" id="slider-cac" min="10" max="5000" step="10" value="250" oninput="updateCalculator()">
+                    </div>
+                    <div class="slider-group">
+                      <label for="slider-churn">
+                        <span>Annual Churn Rate (%)</span>
+                        <strong id="label-churn">10%</strong>
+                      </label>
+                      <input type="range" id="slider-churn" min="2" max="50" step="1" value="10" oninput="updateCalculator()">
+                    </div>
+                    <div class="slider-group">
+                      <label for="slider-customers">
+                        <span>Projected New Annual Customers</span>
+                        <strong id="label-customers">200</strong>
+                      </label>
+                      <input type="range" id="slider-customers" min="10" max="2500" step="10" value="200" oninput="updateCalculator()">
+                    </div>
+                  </div>
+                  <div class="calc-results">
+                    <div class="metric-card">
+                      <span>Customer Lifetime Value (LTV)</span>
+                      <h4 id="calc-ltv">$12,000</h4>
+                    </div>
+                    <div class="metric-card">
+                      <span>LTV : CAC Ratio</span>
+                      <h4 id="calc-ratio" class="text-success">48.0x</h4>
+                      <small id="ratio-verdict">Excellent unit economics.</small>
+                    </div>
+                    <div class="metric-card">
+                      <span>Projected Annual Recurring Revenue</span>
+                      <h4 id="calc-arr">$240,000</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 3: COMPETITOR ANALYSIS -->
+        <section id="tab-competitors" class="tab-panel">
+          <div class="competitor-grid">
+            
+            <!-- Matrix Card -->
+            <div class="card card-span-2">
+              <div class="card-header header-flex">
+                <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <i data-lucide="swatchbook" class="icon-accent"></i>
+                  <h3>Competitor Positioning &amp; Feature Matrix</h3>
+                </div>
+                <span class="badge badge-success">Inline Editable</span>
+              </div>
+              <div class="card-body">
+                <div class="table-wrapper">
+                  <table class="matrix-table" id="competitor-table">
+                    <thead>
+                      <!-- Populated dynamically -->
+                    </thead>
+                    <tbody id="competitor-rows">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+                <div class="matrix-actions" style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+                  <button class="btn btn-secondary" onclick="addCustomFeatureVector()" style="padding: 0.5rem 0.85rem; font-size: 0.8rem;">
+                    <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                    <span>Add Vector</span>
+                  </button>
+                  <button class="btn btn-secondary" onclick="promptAddCompetitor()" style="padding: 0.5rem 0.85rem; font-size: 0.8rem;">
+                    <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                    <span>Add Competitor</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Positioning Map (Visual Grid) -->
+            <div class="card">
+              <div class="card-header">
+                <i data-lucide="grid" class="icon-accent"></i>
+                <h3>Market Positioning Map</h3>
+              </div>
+              <div class="card-body map-card-body">
+                
+                <!-- Map Customization Controls -->
+                <div class="map-controls-panel" style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                  <div class="map-control-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div class="form-group">
+                      <label style="font-size: 0.7rem;">Y-Axis Metric</label>
+                      <select id="map-axis-y" onchange="updateAxesLabels()" style="padding: 0.4rem; font-size: 0.75rem;">
+                        <option value="price">Price (High vs Low)</option>
+                        <option value="market-share">Market Share (Dominant vs Niche)</option>
+                        <option value="completeness">Features (Complete vs Point)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label style="font-size: 0.7rem;">X-Axis Metric</label>
+                      <select id="map-axis-x" onchange="updateAxesLabels()" style="padding: 0.4rem; font-size: 0.75rem;">
+                        <option value="automation">Tech (Automated vs Legacy)</option>
+                        <option value="ease">UX (Self-Serve vs Consultative)</option>
+                        <option value="speed">Delivery (Real-Time vs Slow)</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">🎯 Select target &amp; click map to reposition</label>
+                    <select id="map-reposition-target" style="padding: 0.4rem; font-size: 0.75rem;">
+                      <!-- Populated dynamically -->
+                    </select>
+                  </div>
+                </div>
+
+                <div class="positioning-map-container">
+                  <div class="map-y-label label-high" id="label-y-high">Premium / High Cost</div>
+                  <div class="map-y-label label-low" id="label-y-low">Affordable / Low Cost</div>
+                  <div class="map-x-label label-left" id="label-x-left">Manual / Legacy</div>
+                  <div class="map-x-label label-right" id="label-x-right">Automated / AI-driven</div>
+                  
+                  <div class="positioning-map" id="positioning-map" onclick="handleMapClick(event)">
+                    <!-- Axes lines -->
+                    <div class="axis-y"></div>
+                    <div class="axis-x"></div>
+                    
+                    <!-- Dynamic nodes rendered here -->
+                    <div id="dynamic-map-nodes"></div>
+                  </div>
+                </div>
+                
+                <div class="map-legend" id="map-legend-container" style="margin-top: 1rem;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Battlecards & Playbooks -->
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+              <i data-lucide="shield-alert" class="icon-accent"></i>
+              <h3>Competitor Battlecards &amp; Defensive Playbooks</h3>
+            </div>
+            <div class="card-body">
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                💡 <em>Defend your product positioning. Edit a competitor card below to revise threat assessments, features, or playbooks.</em>
+              </p>
+              <div class="battlecards-grid" id="competitor-battlecards">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: MVP ROADMAP GENERATOR -->
+        <section id="tab-roadmap" class="tab-panel">
+          <div class="card">
+            <div class="card-header header-flex">
+              <div class="header-title-wrapper">
+                <i data-lucide="milestone" class="icon-accent"></i>
+                <h3>Interactive MVP Roadmap &amp; Timeline</h3>
+              </div>
+              <div class="header-actions">
+                <span class="badge badge-success">Interactive Gantt Chart</span>
+              </div>
+            </div>
+            
+            <div class="card-body">
+              <div class="roadmap-scroller">
+                <div class="roadmap-grid-layout">
+                  
+                  <!-- Timeline header column -->
+                  <div class="roadmap-header-row">
+                    <div class="rm-header-cell task-column-width">Track / Milestone</div>
+                    <div class="rm-header-cell">Weeks 1-3 (Research &amp; Specs)</div>
+                    <div class="rm-header-cell">Weeks 4-6 (Core MVP Dev)</div>
+                    <div class="rm-header-cell">Weeks 7-9 (Beta &amp; Iteration)</div>
+                    <div class="rm-header-cell">Weeks 10-12 (Launch &amp; Scaling)</div>
+                  </div>
+                  
+                  <!-- Dynamic Roadmap Content -->
+                  <div id="roadmap-rows" class="roadmap-rows-container">
+                    <div class="placeholder-text text-center py-4">Generate plan to render roadmap timeline tracks.</div>
+                  </div>
+                  
+                </div>
+              </div>
+              <div class="roadmap-instructions">
+                <p>💡 <em>Tip: Click any checkmark checkbox in the roadmap lists below to update milestone completion, or adjust tasks.</em></p>
+              </div>
+              
+              <!-- Checklist of details -->
+              <div class="roadmap-details-grid" id="roadmap-details">
+                <!-- Populated dynamically -->
+              </div>
+              
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: FUNDING & PITCH SUGGESTIONS -->
+        <section id="tab-funding" class="tab-panel">
+          <div class="funding-grid">
+            
+            <!-- Scorecard Pathways -->
+            <div class="card card-span-3">
+              <div class="card-header">
+                <i data-lucide="trending-up" class="icon-accent"></i>
+                <h3>Matched Funding Options</h3>
+              </div>
+              <div class="card-body">
+                <div class="pathways-grid" id="funding-pathways">
+                  <!-- Populated dynamically -->
+                  <div class="placeholder-text">Generate plan to populate matched pathways...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pitch Deck Builder -->
+            <div class="card card-span-2">
+              <div class="card-header">
+                <i data-lucide="presentation" class="icon-accent"></i>
+                <h3>Pitch Deck Outline &amp; Content</h3>
+              </div>
+              <div class="card-body">
+                <div class="pitch-deck-container" id="pitch-deck-outline">
+                  <div class="placeholder-text">Generate plan to view custom slide configurations.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Matching Grants & Programs -->
+            <div class="card">
+              <div class="card-header">
+                <i data-lucide="award" class="icon-accent"></i>
+                <h3>Target Accelerators &amp; Grants</h3>
+              </div>
+              <div class="card-body">
+                <ul class="grants-list" id="grants-and-programs">
+                  <li class="placeholder-text">Generate plan to see matching startup programs...</li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 6: AI CHAT COACH -->
+        <section id="tab-coach" class="tab-panel">
+          <div class="coach-layout">
+            <div class="coach-sidebar card">
+              <div class="coach-profile">
+                <div class="coach-avatar">
+                  <i data-lucide="cpu"></i>
+                </div>
+                <h3>Paul Graham Bot</h3>
+                <p class="coach-tag">YC Startup Mentor AI</p>
+              </div>
+              <div class="coach-prompt-tips">
+                <h4>Suggested Mentor Prompts</h4>
+                <div class="prompt-chips">
+                  <button class="chip" onclick="sendSuggestedPrompt('How do we find our first 10 enterprise pilot clients?')">"How do we find our first 10 enterprise pilot clients?"</button>
+                  <button class="chip" onclick="sendSuggestedPrompt('What is the biggest risk in our current business model?')">"What is the biggest risk in our business model?"</button>
+                  <button class="chip" onclick="sendSuggestedPrompt('How should we handle pricing models for this customer group?')">"How should we handle pricing models?"</button>
+                  <button class="chip" onclick="sendSuggestedPrompt('Critique our problem statement for a YC Application.')">"Critique our problem statement for YC."</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="coach-chat-window card">
+              <div class="chat-header">
+                <div class="chat-status">
+                  <span class="status-dot"></span>
+                  <span>Mentor Active</span>
+                </div>
+              </div>
+              
+              <div class="chat-messages" id="chat-messages">
+                <div class="msg bot-msg">
+                  <p>Welcome! I'm your YC Mentor Bot. Let's make sure you're working on a problem that is real and that you're building something people actually want. Enter a startup plan, then ask me anything about MVP scoping, finding product-market fit, pricing, or fundraising.</p>
+                  <span class="msg-time">Just now</span>
+                </div>
+              </div>
+              
+              <form class="chat-input-bar" onsubmit="handleSendChat(event)">
+                <input type="text" id="chat-input" placeholder="Ask about business validation, pricing, competitor moves..." required autocomplete="off">
+                <button type="submit" class="btn btn-primary btn-square" title="Send Message">
+                  <i data-lucide="send"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 7: RESOURCE DIRECTORY -->
+        <section id="tab-resources" class="tab-panel">
+          <div class="resources-layout">
+            <div class="resources-header card">
+              <div class="rh-title">
+                <i data-lucide="folder-git2" class="icon-accent"></i>
+                <h3>Curated Resource Hub</h3>
+                <p>Actionable toolkits, templates, and credit pathways for your startup phase.</p>
+              </div>
+              <div class="resource-filters">
+                <button class="filter-btn active" data-category="all" onclick="filterResources('all')">All Resources</button>
+                <button class="filter-btn" data-category="tech" onclick="filterResources('tech')">Tech &amp; Dev</button>
+                <button class="filter-btn" data-category="design" onclick="filterResources('design')">Design &amp; UI</button>
+                <button class="filter-btn" data-category="legal" onclick="filterResources('legal')">Legal &amp; Admin</button>
+                <button class="filter-btn" data-category="growth" onclick="filterResources('growth')">Growth &amp; Sales</button>
+              </div>
+            </div>
+
+            <!-- Custom Dynamic Resource Kit (visible after generating a plan) -->
+            <div id="custom-resource-kit" class="custom-kit-grid hidden">
+              <!-- Left: System Architecture Flow Diagram -->
+              <div class="card diagram-card card-span-2">
+                <div class="card-header header-flex">
+                  <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="network" class="icon-accent"></i>
+                    <h3>Custom MVP System Architecture</h3>
+                  </div>
+                  <span class="badge badge-success">Interactive SVG</span>
+                </div>
+                <div class="card-body diagram-body">
+                  <p class="diagram-intro" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Hover over nodes to inspect details about your custom microservices, APIs, and data flows.</p>
+                  
+                  <div class="architecture-canvas-wrapper" style="position: relative; background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow: hidden; display: flex; flex-direction: column; align-items: center;">
+                    <!-- SVG diagram canvas -->
+                    <svg id="architecture-svg" class="architecture-svg" viewBox="0 0 800 400" style="width: 100%; height: auto; min-height: 250px; max-height: 380px;">
+                      <!-- Markers for arrowheads -->
+                      <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
+                        </marker>
+                      </defs>
+                      
+                      <!-- Connection lines are rendered dynamically -->
+                      <g id="svg-connections"></g>
+                      <!-- Interactive nodes are rendered dynamically -->
+                      <g id="svg-nodes"></g>
+                    </svg>
+                    
+                    <!-- Dynamic Details Tooltip -->
+                    <div id="diagram-tooltip" class="diagram-tooltip" style="margin-top: 1rem; width: 100%; padding: 0.75rem; border-radius: 6px; background: rgba(30, 41, 59, 0.8); border: 1px solid var(--border); backdrop-filter: blur(8px);">
+                      <h4 id="tooltip-title" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: var(--primary); font-weight: 600;">System Components</h4>
+                      <p id="tooltip-desc" style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Hover over any system component in the diagram above to inspect details.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Custom Tech Stack & GitHub boilerplate -->
+              <div class="card stack-card">
+                <div class="card-header">
+                  <i data-lucide="cpu" class="icon-accent"></i>
+                  <h3>Your Custom Dev Stack</h3>
+                </div>
+                <div class="card-body" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                  <div class="stack-list" id="custom-stack-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <!-- Loaded dynamically -->
+                  </div>
+                  
+                  <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.25rem 0;">
+
+                  <!-- GitHub boilerplate card -->
+                  <div class="github-boilerplate-box" style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 1rem;">
+                    <div class="github-header" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                      <i data-lucide="github" class="github-icon" style="width: 24px; height: 24px; color: var(--primary);"></i>
+                      <div>
+                        <h4 style="margin: 0; font-size: 0.85rem; font-weight: 600;">Related GitHub Template</h4>
+                        <span id="github-repo-name" class="github-repo-sub" style="font-size: 0.7rem; color: var(--text-muted);">github-owner/repo</span>
+                      </div>
+                    </div>
+                    <p class="github-desc" style="font-size: 0.75rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">Use this pre-configured boilerplate repository to launch your MVP rapidly without setting up boilerplates from scratch.</p>
+                    <a id="github-repo-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block btn-github" style="font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem;">
+                      <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                      <span>Clone Boilerplate Repo</span>
+                    </a>
+                  </div>
+
+                  <!-- PDF Brief download card -->
+                  <div class="pdf-brief-box" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 1rem;">
+                    <div class="pdf-header" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                      <i data-lucide="file-text" class="pdf-icon" style="width: 24px; height: 24px; color: var(--success);"></i>
+                      <div>
+                        <h4 style="margin: 0; font-size: 0.85rem; font-weight: 600;">One-Page Executive Brief</h4>
+                        <span class="pdf-sub" style="font-size: 0.7rem; color: var(--text-muted);">Export Custom Plan PDF</span>
+                      </div>
+                    </div>
+                    <p class="pdf-desc" style="font-size: 0.75rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">Generate a concise PDF containing your core value proposition, tech stack, roadmap checkpoints, and strategy.</p>
+                    <button class="btn btn-secondary btn-block" onclick="exportStartupBriefPDF()" style="font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem;">
+                      <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                      <span>Download Startup PDF Brief</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="resources-grid" id="resources-grid">
+              <!-- Load dynamic links and materials -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast hidden">
+    <div class="toast-content">
+      <i data-lucide="info" id="toast-icon"></i>
+      <span id="toast-msg">Notification Message</span>
+    </div>
+  </div>
+
+  <!-- JS Links -->
+  <script src="generator.js"></script>
+  <script src="chat.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
